@@ -1,5 +1,8 @@
 import pygame
 import os
+import sys
+import neat
+import joblib
 
 from classes import Bird, Pipe, Ground
 
@@ -79,10 +82,32 @@ def animate(bird, pipes, ground):
         
     
 def main():
+    
+    engine = False
+    config_name = "config"
+    if (len(sys.argv) == 2):
+        engine = True
+    if (len(sys.argv) == 3):
+        engine = True  
+        config_name = sys.argv[2] 
+    elif(len(sys.argv) > 3):
+        quit()
+       
     global WIDTH, HEIGHT
     run = True
+    net = None
     
-    bird = Bird(230, 350)
+    if(engine):
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, config_name)
+        config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                                    neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                    config_path)
+        
+        genome = joblib.load(sys.argv[1])  
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        
+    bird = Bird(230, 200)
     ground = Ground(730)
     pipes = [Pipe(700)]
     
@@ -100,9 +125,22 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+                pygame.quit()
+                quit()
+                break
             if event.type == pygame.KEYDOWN:
-                bird.jump()
+                if not engine:
+                    bird.jump()
         
+        pipe_ind = 0
+        if(engine):
+            if len(pipes) > 1 and bird.x > pipes[0].x + pipes[0].PIPE_TOP.get_width():  
+                pipe_ind = 1
+            output = net.activate((bird.y, abs(bird.y - pipes[pipe_ind].height), abs(bird.y - pipes[pipe_ind].bottom)))
+
+            if output[0] > 0.5: 
+                bird.jump()
+            
         run = animate(bird, pipes, ground)
         draw_window(window, font, bird, pipes, ground)
     
