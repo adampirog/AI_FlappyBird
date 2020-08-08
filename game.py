@@ -3,7 +3,7 @@ import os
 import sys
 import neat
 import joblib
-
+from datetime import datetime
 from classes import Bird, Pipe, Ground
 
 
@@ -19,6 +19,18 @@ BACKGROUND_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("graphi
 
 SCORE = 0
 
+ENGINE = False
+
+
+def save_score(filename):
+    if(SCORE > 0):
+        with open(filename, 'a') as file:
+            file.write("\n" + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + ",   SCORE: " + str(SCORE))
+            if(ENGINE):
+                file.write(",    ENGINE")
+            else:
+                file.write(",    HUMAN")
+                
 
 def draw_window(window, font, bird, pipes, ground):
     global SCORE
@@ -82,13 +94,13 @@ def animate(bird, pipes, ground):
         
     
 def main():
+    global ENGINE
     
-    engine = False
     config_name = "config"
     if (len(sys.argv) == 2):
-        engine = True
+        ENGINE = True
     if (len(sys.argv) == 3):
-        engine = True  
+        ENGINE = True  
         config_name = sys.argv[2] 
     elif(len(sys.argv) > 3):
         quit()
@@ -97,7 +109,7 @@ def main():
     run = True
     net = None
     
-    if(engine):
+    if(ENGINE):
         local_dir = os.path.dirname(__file__)
         config_path = os.path.join(local_dir, config_name)
         config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
@@ -124,16 +136,17 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                save_score("scoreboard")
                 run = False
                 pygame.quit()
                 quit()
                 break
             if event.type == pygame.KEYDOWN:
-                if not engine:
+                if not ENGINE:
                     bird.jump()
         
         pipe_ind = 0
-        if(engine):
+        if(ENGINE):
             if len(pipes) > 1 and bird.x > pipes[0].x + pipes[0].PIPE_TOP.get_width():  
                 pipe_ind = 1
             output = net.activate((bird.y, abs(bird.y - pipes[pipe_ind].height), abs(bird.y - pipes[pipe_ind].bottom)))
@@ -144,6 +157,7 @@ def main():
         run = animate(bird, pipes, ground)
         draw_window(window, font, bird, pipes, ground)
     
+    save_score("scoreboard")
     game_over(window, font)
     pygame.quit()
     quit()
