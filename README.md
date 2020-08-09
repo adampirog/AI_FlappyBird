@@ -7,3 +7,6 @@ Source contains the game itself (game.py). Passing the engine file as parameter 
 ## Neural network
 
 File AI_learning.py implements the process of Neural Network training using the neat genetic algorithm. Config file contains the evolutionary algorithm parameters.
+
+## Screenshots
+![](screenshots/sc1.png)
