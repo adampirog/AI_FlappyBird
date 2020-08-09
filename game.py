@@ -136,7 +136,7 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                save_score("scoreboard")
+                save_score("scoreboard.txt")
                 run = False
                 pygame.quit()
                 quit()
@@ -157,7 +157,7 @@ def main():
         run = animate(bird, pipes, ground)
         draw_window(window, font, bird, pipes, ground)
     
-    save_score("scoreboard")
+    save_score("scoreboard.txt")
     game_over(window, font)
     pygame.quit()
     quit()
