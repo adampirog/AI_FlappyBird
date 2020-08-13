@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import csv
 import neat
 import joblib
 from datetime import datetime
@@ -23,13 +24,27 @@ ENGINE = False
 
 
 def save_score(filename):
-    if(SCORE > 0):
+    
+    max_score = 0
+    text = "HUMAN"
+    if (ENGINE):
+        text = "ENGINE"
+        
+    with open(filename, 'r') as file:
+        reader = csv.reader(file, skipinitialspace=True)
+        for row in reader:
+            if(row[2] == text):
+                scr = int(row[1][7:])
+                if(scr > max_score):
+                    max_score = scr
+
+    if(SCORE > max_score):
         with open(filename, 'a') as file:
-            file.write("\n" + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + ",   SCORE: " + str(SCORE))
+            file.write("\n" + datetime.now().strftime("%d-%m-%Y %H:%M:%S") + ", SCORE: " + str(SCORE))
             if(ENGINE):
-                file.write(",    ENGINE")
+                file.write(", ENGINE")
             else:
-                file.write(",    HUMAN")
+                file.write(", HUMAN")
                 
 
 def draw_window(window, font, bird, pipes, ground):

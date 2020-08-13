@@ -172,6 +172,7 @@ def run(config_file):
     
     joblib.dump(winner, "Specimen100")
     print('\nBest genome:\n{!s}'.format(winner))
+    print("Training time:", time() - START_TIME)
 
 
 if __name__ == "__main__":
